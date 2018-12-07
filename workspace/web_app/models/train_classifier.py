@@ -53,21 +53,34 @@ def tokenize(text):
 
     # common inconsequential words are removed using stopwords as the removal of
     # those words affords ml algorithms better clarity and meaty words to
-    # focus on
+    # focus on.
     stop_words = stopwords.words("english")
 
     # lemmatizer cuts the words to its root so that ml algorithms have fewer words
     # to focus on
     lemmat = WordNetLemmatizer()
 
+    # removing few other words that are just greetings but doesn't have any siginificance
+    # with respect to the task at hand. removing them by just adding those words to stopwords list
     cust_stop_words_list = ['hello', 'good morning', 'good evening', 'good afternoon', 'sir', 'madam']
     for words in cust_stop_words_list:
         stop_words.append(words)
 
     clean_tokens = []
+    # all text is converted to lowercase and all web urls are removed
+    # and a place holder is left in its place
     text = text.lower()
     text = re.sub(r"(https*:|www\.)\S+", r"urlplaceholder", text)
+
+    # here all characters except a to z are removed, cause punctuations, numbers could be
+    # different for what is essentially the same text. For instance,
+    # text 'a borrowed $1000 from b' and 'c borrowed $3000 from d' are essentially the same
+    #  and talks about borrowing but the numbers involved are different. removing the
+    # numbers involved will make both the texts look the same to ml
+
     text = re.sub(r"[^a-z]", " ", text)
+
+    # the text is tokenised for countvectorizer to create BoW matrix.
     tokens = [word for sent in sent_tokenize(text) for word in word_tokenize(sent)]
     tokens = [token for token in tokens if token not in stop_words]
     for tok in tokens:
@@ -78,13 +91,17 @@ def tokenize(text):
 
 def build_model():
     '''
+    this function builds a pipeline for text classification
 
-    :return:
+    :return: the pipeline
     '''
+
+    # initializing a random forest classifier
     forest = RandomForestClassifier(n_estimators=100, random_state=42)
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
+        # MultiOutputClassifier is used as the output is a multi class output.
         ('clf', MultiOutputClassifier(forest, n_jobs=-1))
     ])
     return pipeline
@@ -92,12 +109,14 @@ def build_model():
 
 def evaluate_model(model, X_test, Y_test, category_names):
     '''
+    this function evaluates the model on three parameters and prints the results.
+    1) precision, 2) recall and 3) f1 score.
 
-    :param model:
-    :param X_test:
-    :param Y_test:
-    :param category_names:
-    :return:
+    :param model: the model that is to be evaluated
+    :param X_test: the test set for prediction
+    :param Y_test: the test sets true response variable
+    :param category_names: names of the columns of the response variable
+    :return: None
     '''
     Y_pred = model.predict(X_test)
     for idx, column in enumerate(category_names):
@@ -107,10 +126,11 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 def save_model(model, model_filepath):
     '''
+    this function takes a model and saves it as a pickle in the given name
 
-    :param model:
-    :param model_filepath:
-    :return:
+    :param model: model to be saved as a pickle
+    :param model_filepath: the filepath besides the name of the pickle
+    :return: None
     '''
     pickle.dump(model, open(model_filepath,'wb'))
     
