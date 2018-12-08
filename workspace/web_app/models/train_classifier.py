@@ -72,8 +72,8 @@ def build_model():
     pipeline = Pipeline([
     ('features', FeatureUnion([
         ('text_pipeline',Pipeline([
-            ('vect', CountVectorizer(tokenizer=tokenize, max_df = 0.7, ngram_range=(1, 2))),
-            ('tfidf', TfidfTransformer(sublinear_tf=True))
+            ('vect', CountVectorizer(tokenizer=tokenize)),
+            ('tfidf', TfidfTransformer())
         ])),
          ('isenglish',IsEnglish())
     ])),
@@ -116,7 +116,7 @@ def main():
 
         print('Training model...')
         model.fit(X_train, Y_train)
-        
+
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
 
