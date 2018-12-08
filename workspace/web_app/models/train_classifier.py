@@ -18,6 +18,23 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from nltk import pos_tag
 import pickle
 
+class IsEnglish(BaseEstimator, TransformerMixin):
+    def detect_english(self, text):
+        try:
+            if(detect(text) == 'en'):
+                return True
+            else:
+                return False
+        except:
+            return False
+
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, X):
+        X_tagged = pd.Series(X).apply(lambda x: self.detect_english(x))
+        return pd.DataFrame(X_tagged)
+
 def load_data(database_filepath):
     engine = create_engine('sqlite:///'+database_filepath)
     conn = engine.connect()
@@ -50,24 +67,39 @@ def tokenize(text):
 
 def build_model():
     forest = RandomForestClassifier(n_estimators=100, random_state=42)
+    parameters = {
+    'vect__decode_error':['strict','ignore'],
+    'vect__ngram_range':[(1,1), (1,2)],
+    'vect__max_df':[0.7, 0.9],
+    'tfidf__sublinear_tf':[True, False]
+    }
+
     pipeline = Pipeline([
-        ('vect', CountVectorizer(tokenizer=tokenize)),
-        ('tfidf', TfidfTransformer()),
-        ('clf', MultiOutputClassifier(forest, n_jobs=-1))
+    ('features', FeatureUnion([
+        ('text_pipeline',Pipeline([
+            ('vect', CountVectorizer(tokenizer=tokenize, max_df = 0.7, ngram_range=(1, 2))),
+            ('tfidf', TfidfTransformer(sublinear_tf=True))
+        ])),
+         ('isenglish',IsEnglish())
+    ])),
+    ('clf', MultiOutputClassifier(forest, n_jobs=-1))
     ])
-    return pipeline
+
+    cv = GridSearchCV(pipeline, parameters)
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    model = model.best_estimator_
     Y_pred = model.predict(X_test)
     for idx, column in enumerate(category_names):
         print('the category being evaluated is: --', column)
         print(classification_report(Y_test[column], Y_pred[:, idx]))
 
 
-def save_model(model, model_filepath):   
+def save_model(model, model_filepath):
     pickle.dump(model, open(model_filepath,'wb'))
-    
+
 
 def main():
     if len(sys.argv) == 3:
@@ -75,13 +107,13 @@ def main():
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
-        
+
         print('Building model...')
         model = build_model()
-        
+
         print('Training model...')
         model.fit(X_train, Y_train)
-        
+
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
 
