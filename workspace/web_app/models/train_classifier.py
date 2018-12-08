@@ -66,13 +66,8 @@ def tokenize(text):
 
 
 def build_model():
+
     forest = RandomForestClassifier(n_estimators=100, random_state=42)
-    parameters = {
-    'vect__decode_error':['strict','ignore'],
-    'vect__ngram_range':[(1,1), (1,2)],
-    'vect__max_df':[0.7, 0.9],
-    'tfidf__sublinear_tf':[True, False]
-    }
 
     pipeline = Pipeline([
     ('features', FeatureUnion([
@@ -84,6 +79,14 @@ def build_model():
     ])),
     ('clf', MultiOutputClassifier(forest, n_jobs=-1))
     ])
+
+
+    parameters = {
+    'features__text_pipeline__vect__decode_error':['strict','ignore'],
+    'features__text_pipeline__vect__ngram_range':[(1,1), (1,2)],
+    'features__text_pipeline__vect__max_df':[0.7, 0.9],
+    'features__text_pipeline__tfidf__sublinear_tf':[True, False]
+    }
 
     cv = GridSearchCV(pipeline, parameters)
     return cv
@@ -113,7 +116,7 @@ def main():
 
         print('Training model...')
         model.fit(X_train, Y_train)
-
+        
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
 
