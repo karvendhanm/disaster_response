@@ -40,38 +40,91 @@ def index():
     
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
     
-    # create visuals
-    # TODO: Below is an example - modify to create your own visuals
-    graphs = [
-        {
-            'data': [
-                Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
-            ],
+ # Original code comment begins here
+#     genre_counts = df.groupby('genre').count()['message']
+#     genre_names = list(genre_counts.index)    
+    
+#     # create visuals
+#     # TODO: Below is an example - modify to create your own visuals
+#     graphs = [
+#         {
+#             'data': [
+#                 Bar(
+#                     x=genre_names,
+#                     y=genre_counts
+#                 )
+#             ],
 
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
-            }
-        }
-    ]
+#            'layout': {
+#                 'title': 'Distribution of Message Genres',
+#                 'yaxis': {
+#                     'title': "Count"
+#                 },
+#                 'xaxis': {
+#                     'title': "Genre"
+#                 }
+#             }
+#         }
+#     ]
+# original code comment ends here
+
+## my code begins here
+    genre_counts = df.groupby('genre').count()['message']
+    genre_counts_list = genre_counts.tolist()
+    genre_names = genre_counts.index
+    genre_names_list = genre_names.tolist()
     
-    # encode plotly graphs in JSON
-    ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
-    graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
+    graph_one = []
+    graph_one.append(
+       Bar(
+            x = genre_names_list,
+            y = genre_counts_list,
+        )
+    )
     
-    # render web page with plotly graphs
-    return render_template('master.html', ids=ids, graphJSON=graphJSON)
+    layout_one = dict(title = 'Distribution of Message Genres',
+                      xaxis = dict(title = 'Genre',),
+                      yaxis = dict(title = 'Count'),
+                     )
+    
+    basic_necessity_list = ['water', 'shelter', 'food']
+    perc_list = []
+    for col in basic_necessity_list:
+        perc_list.append(round(((df[col].sum()/len(df)) * 100),2))
+    
+    graph_two = []
+    graph_two.append(
+       Bar(
+            x = basic_necessity_list,
+            y = perc_list,
+        )
+    )
+    
+    layout_two = dict(title = 'Texts on Basic Necessities as a percentage of the Whole',
+                      xaxis = dict(title = 'Type of Basic Necessity',),
+                      yaxis = dict(title = 'Percentage of Total'),
+                     )    
+    
+    figures = []
+    figures.append(dict(data = graph_one, layout = layout_one))
+    figures.append(dict(data = graph_two, layout = layout_two))  
+    
+    ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
+
+    # Convert the plotly figures to JSON for javascript in html template
+    figuresJSON = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('master.html',ids=ids,figuresJSON=figuresJSON)
+    
+## my code ends here
+    
+#     # encode plotly graphs in JSON
+#     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
+#     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
+    
+#     # render web page with plotly graphs
+#     return render_template('master.html', ids=ids, graphJSON=graphJSON)
 
 
 # web page that handles user query and displays model results
