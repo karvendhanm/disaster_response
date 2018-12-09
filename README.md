@@ -9,6 +9,7 @@ Classify distress messages from people in disaster struck zones using NLP and su
 4. [Results](#results)
 5. [Code Execution Instruction](#samplecode)
 6. [Licensing, Authors, and Acknowledgements](#licensing)
+7. [Summary](#summary)
 
 ## Installation <a name="installation"></a>
 
@@ -42,7 +43,7 @@ for the webpage. Also, it has templates folder which has go.html, master.html wh
 
 ## Results<a name="results"></a>
 
-1) I was able to categorize messages with over 95% accuracy with respect to all categories expect a couple where the accuracy was
+1) I was able to categorize messages with around 90% accuracy with respect to all categories expect four categories where the accuracy is
 around 80%. 
 
 ## Code Execution Instruction <a name="samplecode"></a>
@@ -54,4 +55,11 @@ around 80%.
 ## Licensing, Authors, Acknowledgements<a name="licensing"></a>
 
 Must give credit to figuure-eight for the [data](https://www.figure-eight.com/data-for-everyone/). Otherwise, feel free to use the code here as you would like!
+
+## Summary<a name="summary"></a>
+
+A dataset from figure-eight of text messages sent during disasters have been taken and the text messages have been classified into 36 categories. As disaster is the time when relief agencies are overwhelmed and can't sort through these messages manually or keyword search, these algorithms will help sort these message.
+
+Overall was able to categorize messages with aound 90% accuracy with respect to all categories expect four categories where the accuracy is around 80%.
+
 
