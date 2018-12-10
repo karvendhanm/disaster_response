@@ -1,6 +1,8 @@
 # disaster_response
 Classify distress messages from people in disaster struck zones using NLP and supervised learning so that the messages could be forwarded to relevant agencies for relief.
 
+![image](https://github.com/karvendhanm/disaster_response/blob/master/disaster_response.png)
+
 ### Table of Contents
 
 1. [Installation](#installation)
